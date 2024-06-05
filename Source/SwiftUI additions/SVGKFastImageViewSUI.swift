@@ -1,29 +1,53 @@
-
 import SwiftUI
 import SVGKit
 
-@available(iOS 13.0, tvOS 13.0, *)
-struct SVGKFastImageViewSUI:UIViewRepresentable
-{
-    @Binding var url:URL
-    @Binding var iconSize:CGFloat
+@available(iOS 13.0, tvOS 13.0, macOS 10.15, *)
+struct SVGKFastImageViewSUI: View {
+    @Binding var url: URL
+    @Binding var iconSize: CGFloat
     
-    func makeUIView(context: Context) -> SVGKFastImageView {
-
-        let svgImage = SVGKImage(contentsOf: url)
-        return SVGKFastImageView(svgkImage: svgImage ?? SVGKImage())
-        
+    var body: some View {
+        SVGKImageViewRepresentable(url: $url, iconSize: $iconSize)
     }
-    func updateUIView(_ uiView: SVGKFastImageView, context: Context) {
-        uiView.image = SVGKImage(contentsOf: url)
-        
-        uiView.image.size = CGSize(width: iconSize,height: iconSize)
-    }
-    
-    
 }
 
+#if os(iOS) || os(tvOS)
 @available(iOS 13.0, tvOS 13.0, *)
+struct SVGKImageViewRepresentable: UIViewRepresentable {
+    @Binding var url: URL
+    @Binding var iconSize: CGFloat
+    
+    func makeUIView(context: Context) -> SVGKFastImageView {
+        let svgImage = SVGKImage(contentsOf: url)
+        return SVGKFastImageView(svgkImage: svgImage ?? SVGKImage())
+    }
+    
+    func updateUIView(_ uiView: SVGKFastImageView, context: Context) {
+        uiView.image = SVGKImage(contentsOf: url)
+        uiView.image.size = CGSize(width: iconSize, height: iconSize)
+    }
+}
+#endif
+
+#if os(macOS)
+@available(macOS 10.15, *)
+struct SVGKImageViewRepresentable: NSViewRepresentable {
+    @Binding var url: URL
+    @Binding var iconSize: CGFloat
+    
+    func makeNSView(context: Context) -> SVGKFastImageView {
+        let svgImage = SVGKImage(contentsOf: url)
+        return SVGKFastImageView(svgkImage: svgImage ?? SVGKImage())
+    }
+    
+    func updateNSView(_ nsView: SVGKFastImageView, context: Context) {
+        nsView.image = SVGKImage(contentsOf: url)
+        nsView.image.size = CGSize(width: iconSize, height: iconSize)
+    }
+}
+#endif
+
+@available(iOS 13.0, tvOS 13.0, macOS 10.15, *)
 struct SVGImage_Previews: PreviewProvider {
     static var previews: some View {
         SVGKFastImageViewSUI(url: .constant(URL(string:"https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/android.svg")!), iconSize: .constant(50.0))
